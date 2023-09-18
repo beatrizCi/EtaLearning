@@ -11,7 +11,7 @@ namespace EtaLearning.API.Controllers
 
         public ClientsController()
         {
-           
+
             clients = new List<Client>
             {
                 new Client
@@ -29,21 +29,20 @@ namespace EtaLearning.API.Controllers
             };
         }
 
-       
+        [HttpGet("GetClients")]
+        public IActionResult GetClients()
+        {
 
-    [HttpGet("GetClients")]
-    public IActionResult GetClients()
-    {
-     
-        return Ok(clients);
-    }
+            return Ok(clients);
+        }
+
         [HttpPost("CreateNewClient")]
         public IActionResult CreateNewClient([FromBody] Client newClient)
         {
             // Check if a client with the same name already exists in the list
             if (clients.Any(c => c.Name == newClient.Name))
             {
-                return BadRequest("A client with the same name already exists.");
+                return BadRequest(" A client with the same name already exists.");
             }
 
             // Calculate the new ID by incrementing the last ID in the collection
@@ -61,20 +60,21 @@ namespace EtaLearning.API.Controllers
         }
 
         [HttpGet("GetClientById/{id}")]
-    public IActionResult GetClientById(int id)
-    {
-     
-        var client = clients.FirstOrDefault(c => c.Id == id);
-
-        if (client == null)
+        public IActionResult GetClientById(int id)
         {
-            return NotFound();
-        }
 
-        return Ok(client);
+            var client = clients.FirstOrDefault(c => c.Id == id);
+
+            if (client == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(client);
+        }
     }
-}
-public class Client
+    
+    public class Client
     {
         public int Id { get; set; }
         public string Name { get; set; }
