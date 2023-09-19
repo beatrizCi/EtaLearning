@@ -37,18 +37,61 @@ namespace EtaLearning.API.Controllers
         [HttpPost("CreateNewClient")]
         public IActionResult CreateNewClient([FromBody] Clients newClient)
         {
+            if (string.IsNullOrEmpty(newClient.Name))
+            {
+                return BadRequest("Client name is required.");
+            }
+
             if (clients.Any(c => c.Name == newClient.Name))
             {
                 return BadRequest("A client with the same name already exists.");
             }
 
             int newId = clients.Count > 0 ? clients.Max(c => c.Id) + 1 : 1;
-            newClient.Id = newId;
-            newClient.CreationDate = DateTime.UtcNow;
 
-            clients.Add(newClient);
+            var createdClient = new Clients
+            {
+                Id = newId,
+                Name = newClient.Name,
+                CreationDate = DateTime.UtcNow
+            };
 
-            return CreatedAtAction(nameof(GetClientById), new { id = newClient.Id }, newClient);
+            clients.Add(createdClient);
+
+            return CreatedAtAction(nameof(GetClientById), new { id = createdClient.Id }, createdClient);
+        }
+
+        [HttpPut("EditClient/{id}")]
+        public IActionResult EditClient(int id, [FromBody] Clients updatedClient)
+        {
+            var existingClient = clients.FirstOrDefault(c => c.Id == id);
+
+            if (existingClient == null)
+            {
+                return NotFound();
+            }
+
+            if (!string.IsNullOrEmpty(updatedClient.Name))
+            {
+                existingClient.Name = updatedClient.Name;
+            }
+
+            return Ok(existingClient);
+        }
+
+        [HttpDelete("DeleteClient/{id}")]
+        public IActionResult DeleteClient(int id)
+        {
+            var clientToDelete = clients.FirstOrDefault(c => c.Id == id);
+
+            if (clientToDelete == null)
+            {
+                return NotFound();
+            }
+
+            clients.Remove(clientToDelete);
+
+            return NoContent();
         }
 
         [HttpGet("GetClientById/{id}")]
