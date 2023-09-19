@@ -35,14 +35,14 @@ namespace EtaLearning.API.Controllers
         }
 
         [HttpPost("CreateNewClient")]
-        public IActionResult CreateNewClient([FromBody] Clients newClient)
+        public IActionResult CreateNewClient([FromBody] string name)
         {
-            if (string.IsNullOrEmpty(newClient.Name))
+            if (string.IsNullOrEmpty(name))
             {
                 return BadRequest("Client name is required.");
             }
 
-            if (clients.Any(c => c.Name == newClient.Name))
+            if (clients.Any(c => c.Name == name))
             {
                 return BadRequest("A client with the same name already exists.");
             }
@@ -52,7 +52,7 @@ namespace EtaLearning.API.Controllers
             var createdClient = new Clients
             {
                 Id = newId,
-                Name = newClient.Name,
+                Name = name,
                 CreationDate = DateTime.UtcNow
             };
 
