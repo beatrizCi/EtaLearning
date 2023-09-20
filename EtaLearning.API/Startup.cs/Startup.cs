@@ -2,18 +2,16 @@
 
 public class Startup
 {
-
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
     {
-
-
         using (var scope = app.ApplicationServices.CreateScope())
         {
             var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-
-            dbContext.Clients.Add(new Clients { Name = "Initial Client" });
+            dbContext.Clients.AddRange(
+                       new Clients { Id = 1, Name = "Lustitia Ltd", CreationDate = DateTime.UtcNow },
+                       new Clients { Id = 2, Name = "Bachmann", CreationDate = DateTime.UtcNow }
+                   );
             dbContext.SaveChanges();
         }
-
     }
 }

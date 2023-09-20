@@ -8,7 +8,6 @@ namespace EtaLearning.API.Controllers
     public class ClientsController : ControllerBase
     {
         private readonly AppDbContext _dbContext;
-        private readonly object clients;
 
         public ClientsController(AppDbContext dbContext)
         {
@@ -76,15 +75,23 @@ namespace EtaLearning.API.Controllers
                 CreationDate = DateTime.UtcNow
             };
 
-            _dbContext.Clients.Add(newClient);
-            _dbContext.SaveChanges();
+            _dbContext.Clients.AddAsync(newClient);
+            _dbContext.SaveChangesAsync();
 
             return CreatedAtAction(nameof(GetClientById), new { id = newClient.Id }, newClient);
         }
 
-        private object GetClientById()
+        [HttpGet("GetClientById/{id}")]
+        public async Task<IActionResult> GetClientById(int id)
         {
-            throw new NotImplementedException();
+            var client = await _dbContext.Clients.FindAsync(id);
+
+            if (client == null)
+            {
+                return NotFound(); 
+            }
+
+            return Ok(client); 
         }
     }
 }
