@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using EtaLearning.API.Models;
+using EtaLearning.API.Models; 
 
 namespace EtaLearning.API.Controllers
 {
@@ -7,31 +7,54 @@ namespace EtaLearning.API.Controllers
     [ApiController]
     public class ClientsController : ControllerBase
     {
-        private readonly List<Clients> clients;
+        private readonly AppDbContext _dbContext;
+        private readonly object clients;
 
-        public ClientsController()
+        public ClientsController(AppDbContext dbContext)
         {
-            clients = new List<Clients>
-            {
-                new Clients
-                {
-                    Id = 1,
-                    Name = "Lustitia Ltd",
-                    CreationDate = DateTime.UtcNow
-                },
-                new Clients
-                {
-                    Id = 2,
-                    Name = "Bachmann",
-                    CreationDate = DateTime.UtcNow
-                }
-            };
+            _dbContext = dbContext;
         }
 
         [HttpGet("GetClients")]
         public IActionResult GetClients()
         {
+            var clients = _dbContext.Clients.ToList();
             return Ok(clients);
+        }
+
+        [HttpPut("EditClient/{id}")]
+        public async Task<IActionResult> EditClient(int id, [FromBody] Clients updatedClient)
+        {
+            var existingClient = await _dbContext.Clients.FindAsync(id);
+
+            if (existingClient == null)
+            {
+                return NotFound();
+            }
+
+            if (!string.IsNullOrEmpty(updatedClient.Name))
+            {
+                existingClient.Name = updatedClient.Name;
+                await _dbContext.SaveChangesAsync(); 
+            }
+
+            return Ok(existingClient);
+        }
+
+        [HttpDelete("DeleteClient/{id}")]
+        public async Task<IActionResult> DeleteClient(int id)
+        {
+            var clientToDelete = await _dbContext.Clients.FindAsync(id);
+
+            if (clientToDelete == null)
+            {
+                return NotFound();
+            }
+
+            _dbContext.Clients.Remove(clientToDelete);
+            await _dbContext.SaveChangesAsync();
+
+            return NoContent();
         }
 
         [HttpPost("CreateNewClient")]
@@ -42,69 +65,26 @@ namespace EtaLearning.API.Controllers
                 return BadRequest("Client name is required.");
             }
 
-            if (clients.Any(c => c.Name == name))
+            if (_dbContext.Clients.Any(c => c.Name == name))
             {
                 return BadRequest("A client with the same name already exists.");
             }
 
-            int newId = clients.Count > 0 ? clients.Max(c => c.Id) + 1 : 1;
-
-            var createdClient = new Clients
+            var newClient = new Clients
             {
-                Id = newId,
                 Name = name,
                 CreationDate = DateTime.UtcNow
             };
 
-            clients.Add(createdClient);
+            _dbContext.Clients.Add(newClient);
+            _dbContext.SaveChanges();
 
-            return CreatedAtAction(nameof(GetClientById), new { id = createdClient.Id }, createdClient);
+            return CreatedAtAction(nameof(GetClientById), new { id = newClient.Id }, newClient);
         }
 
-        [HttpPut("EditClient/{id}")]
-        public IActionResult EditClient(int id, [FromBody] Clients updatedClient)
+        private object GetClientById()
         {
-            var existingClient = clients.FirstOrDefault(c => c.Id == id);
-
-            if (existingClient == null)
-            {
-                return NotFound();
-            }
-
-            if (!string.IsNullOrEmpty(updatedClient.Name))
-            {
-                existingClient.Name = updatedClient.Name;
-            }
-
-            return Ok(existingClient);
-        }
-
-        [HttpDelete("DeleteClient/{id}")]
-        public IActionResult DeleteClient(int id)
-        {
-            var clientToDelete = clients.FirstOrDefault(c => c.Id == id);
-
-            if (clientToDelete == null)
-            {
-                return NotFound();
-            }
-
-            clients.Remove(clientToDelete);
-
-            return NoContent();
-        }
-
-        [HttpGet("GetClientById/{id}")]
-        public IActionResult GetClientById(int id)
-        {
-            var client = clients.FirstOrDefault(c => c.Id == id);
-
-            if (client == null)
-            {
-                return NotFound();
-            }
-
-            return Ok(client);
+            throw new NotImplementedException();
         }
     }
 }
