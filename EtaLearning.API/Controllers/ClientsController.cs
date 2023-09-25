@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using EtaLearning.API.Models; 
+using EtaLearning.API.Models;
+using EtaLearning.API.Data;
+using EtaLearning.API.Data.Entities;
 
 namespace EtaLearning.API.Controllers
 {
@@ -69,7 +71,7 @@ namespace EtaLearning.API.Controllers
                 return BadRequest("A client with the same name already exists.");
             }
 
-            var newClient = new Clients
+            var newClient = new Client
             {
                 Name = name,
                 CreationDate = DateTime.UtcNow
@@ -90,7 +92,6 @@ namespace EtaLearning.API.Controllers
             {
                 return NotFound(); 
             }
-
             return Ok(client); 
         }
     }

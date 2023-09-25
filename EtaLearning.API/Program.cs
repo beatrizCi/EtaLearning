@@ -1,11 +1,14 @@
-using EtaLearning.API.Models;
+using EtaLearning.API.Data;
+using EtaLearning.API.Data.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
 
+var config = builder.Configuration;
 
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseInMemoryDatabase("InMemoryDatabase"));
+    options.UseSqlServer(config.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -26,11 +29,14 @@ app.MapControllers();
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    dbContext.Clients.AddRange(
-               new Clients { Id = 1, Name = "Lustitia Ltd", CreationDate = DateTime.UtcNow },
-               new Clients { Id = 2, Name = "Bachmann", CreationDate = DateTime.UtcNow }
+    if (!dbContext.Clients.Any())
+    {
+        dbContext.Clients.AddRange(
+               new Client { Name = "Lustitia Ltd", CreationDate = DateTime.UtcNow },
+               new Client { Name = "Bachmann", CreationDate = DateTime.UtcNow }
            );
-    dbContext.SaveChanges();
+        dbContext.SaveChanges();
+    }
 }
 
 app.Run();
