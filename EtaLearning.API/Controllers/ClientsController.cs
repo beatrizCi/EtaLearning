@@ -24,7 +24,7 @@ namespace EtaLearning.API.Controllers
         }
 
         [HttpPut("EditClient/{id}")]
-        public async Task<IActionResult> EditClient(int id, [FromBody] Clients updatedClient)
+        public async Task<IActionResult> EditClient(int id, [FromBody] string name)
         {
             var existingClient = await _dbContext.Clients.FindAsync(id);
 
@@ -33,9 +33,9 @@ namespace EtaLearning.API.Controllers
                 return NotFound();
             }
 
-            if (!string.IsNullOrEmpty(updatedClient.Name))
+            if (!string.IsNullOrEmpty(name))
             {
-                existingClient.Name = updatedClient.Name;
+                existingClient.Name = name;
                 await _dbContext.SaveChangesAsync(); 
             }
 
