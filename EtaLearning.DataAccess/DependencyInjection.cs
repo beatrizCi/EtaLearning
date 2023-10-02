@@ -10,6 +10,7 @@ namespace EtaLearning.DataAccess
     {
         public static void AddDataAccess(this IServiceCollection services, IConfiguration configuration)
         {
+          services.AddScoped<IClientRepository, ClientRepository>();
             services.AddDbContext<AppDbContext>(options =>
                 options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
         }

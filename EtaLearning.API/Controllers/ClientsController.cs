@@ -1,32 +1,37 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using EtaLearning.API.Models;
 using EtaLearning.API.Data;
 using EtaLearning.API.Data.Entities;
 
 namespace EtaLearning.API.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
+    [Route("api/clients")]
     public class ClientsController : ControllerBase
     {
-        private readonly AppDbContext _dbContext;
+        private readonly IClientRepository _clientRepository;
 
-        public ClientsController(AppDbContext dbContext)
+        public ClientsController(IClientRepository clientRepository)
         {
-            _dbContext = dbContext;
+            _clientRepository = clientRepository;
         }
 
-        [HttpGet("GetClients")]
-        public IActionResult GetClients()
+        [HttpGet("{id}")]
+        public IActionResult GetClientById(int id)
         {
-            var clients = _dbContext.Clients.ToList();
-            return Ok(clients);
+            var client = _clientRepository.GetById(id);
+
+            if (client == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(client);
         }
 
-        [HttpPut("EditClient/{id}")]
+        [HttpPut("{id}")]
         public async Task<IActionResult> EditClient(int id, [FromBody] string name)
         {
-            var existingClient = await _dbContext.Clients.FindAsync(id);
+            var existingClient = _clientRepository.GetById(id);
 
             if (existingClient == null)
             {
@@ -36,29 +41,28 @@ namespace EtaLearning.API.Controllers
             if (!string.IsNullOrEmpty(name))
             {
                 existingClient.Name = name;
-                await _dbContext.SaveChangesAsync(); 
+                _clientRepository.Update(existingClient);
             }
 
             return Ok(existingClient);
         }
 
-        [HttpDelete("DeleteClient/{id}")]
+        [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteClient(int id)
         {
-            var clientToDelete = await _dbContext.Clients.FindAsync(id);
+            var clientToDelete = _clientRepository.GetById(id);
 
             if (clientToDelete == null)
             {
                 return NotFound();
             }
 
-            _dbContext.Clients.Remove(clientToDelete);
-            await _dbContext.SaveChangesAsync();
+            _clientRepository.Delete(id);
 
             return NoContent();
         }
 
-        [HttpPost("CreateNewClient")]
+        [HttpPost]
         public IActionResult CreateNewClient([FromBody] string name)
         {
             if (string.IsNullOrEmpty(name))
@@ -66,7 +70,7 @@ namespace EtaLearning.API.Controllers
                 return BadRequest("Client name is required.");
             }
 
-            if (_dbContext.Clients.Any(c => c.Name == name))
+            if (_clientRepository.ClientExists(name))
             {
                 return BadRequest("A client with the same name already exists.");
             }
@@ -77,22 +81,9 @@ namespace EtaLearning.API.Controllers
                 CreationDate = DateTime.UtcNow
             };
 
-            _dbContext.Clients.AddAsync(newClient);
-            _dbContext.SaveChangesAsync();
+            _clientRepository.Create(newClient);
 
             return CreatedAtAction(nameof(GetClientById), new { id = newClient.Id }, newClient);
-        }
-
-        [HttpGet("GetClientById/{id}")]
-        public async Task<IActionResult> GetClientById(int id)
-        {
-            var client = await _dbContext.Clients.FindAsync(id);
-
-            if (client == null)
-            {
-                return NotFound(); 
-            }
-            return Ok(client); 
         }
     }
 }
