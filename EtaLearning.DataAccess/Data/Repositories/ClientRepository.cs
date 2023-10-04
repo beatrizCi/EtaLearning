@@ -15,16 +15,16 @@ namespace EtaLearning.API.Data
         _dbContext = dbContext;
     }
        
-
-        public async Task<IEnumerable<Client>> GetAll()
+        public async Task<IEnumerable<Client>> GetAllAsync()
         {
             return await _dbContext.Clients.ToListAsync();
         }
 
         public async Task<Client> GetById(int id)
         {
-        return _dbContext.Clients.FirstOrDefault(c => c.Id == id);
-    }
+            return await _dbContext.Clients.FirstOrDefaultAsync(c => c.Id == id);
+        }
+
 
         public async Task CreateAsync(Client client)
     {
@@ -40,15 +40,14 @@ namespace EtaLearning.API.Data
 
     public async Task DeleteAsync(int id)
     {
-        var client = _dbContext.Clients.Find(id);
+        var client = _dbContext.Clients.FindAsync(id);
         if (client != null)
         {
-            _dbContext.Clients.Remove(client);
+            _dbContext.Clients.Remove(await client);
           await  _dbContext.SaveChangesAsync();
         }
     }
-
-        public async Task<bool> IsClientExists(int id)
+        public async Task<bool> IsClientExistsAsync(int id)
         {
             return await _dbContext.Clients.AnyAsync(c => c.Id == id);
         }

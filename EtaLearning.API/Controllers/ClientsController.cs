@@ -62,7 +62,7 @@ public class ClientsController : ControllerBase
     [HttpGet("CheckExistence/{id}")]
     public async Task<IActionResult> CheckClientExistence(int id)
     {
-        var exists = await _clientRepository.IsClientExists(id);
+        var exists = await _clientRepository.IsClientExistsAsync(id);
 
         return Ok(exists);
     }
