@@ -1,15 +1,16 @@
 ﻿using EtaLearning.API.Data.Entities;
-
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace EtaLearning.API.Data
 {
     public interface IClientRepository
-{
-    IEnumerable<Client> GetAll();
-    Client GetById(int id);
-    void Create(Client client);
-    void Update(Client client);
-    void Delete(int id);
-        bool ClientExists(string name);
+    {
+        Task<IEnumerable<Client>> GetAll();
+        Task<Client> GetById(int id);
+        Task UpdateAsync(Client client);
+        Task DeleteAsync(int id);
+        Task CreateAsync(Client client);
+        Task<bool> IsClientExists(int id);
     }
 }

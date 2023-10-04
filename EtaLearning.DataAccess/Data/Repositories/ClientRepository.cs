@@ -1,9 +1,12 @@
 ﻿using EtaLearning.API.Data.Entities;
 using EtaLearning.API.Data;
+using Microsoft.EntityFrameworkCore;
+
+
 
 namespace EtaLearning.API.Data
 {
-    public class ClientRepository : IClientRepository
+    public  class ClientRepository : IClientRepository
 {
     private readonly AppDbContext _dbContext;
 
@@ -11,37 +14,44 @@ namespace EtaLearning.API.Data
     {
         _dbContext = dbContext;
     }
+       
 
-    public IEnumerable<Client> GetAll()
-    {
-        return _dbContext.Clients.ToList();
-    }
+        public async Task<IEnumerable<Client>> GetAll()
+        {
+            return await _dbContext.Clients.ToListAsync();
+        }
 
-    public Client GetById(int id)
-    {
+        public async Task<Client> GetById(int id)
+        {
         return _dbContext.Clients.FirstOrDefault(c => c.Id == id);
     }
 
-    public void Create(Client client)
+        public async Task CreateAsync(Client client)
     {
-        _dbContext.Clients.Add(client);
-        _dbContext.SaveChanges();
+        _dbContext.Clients.AddAsync(client);
+       await _dbContext.SaveChangesAsync();
     }
 
-    public void Update(Client client)
+    public async Task UpdateAsync(Client client)
     {
         _dbContext.Clients.Update(client);
-        _dbContext.SaveChanges();
+       await _dbContext.SaveChangesAsync();
     }
 
-    public void Delete(int id)
+    public async Task DeleteAsync(int id)
     {
         var client = _dbContext.Clients.Find(id);
         if (client != null)
         {
             _dbContext.Clients.Remove(client);
-            _dbContext.SaveChanges();
+          await  _dbContext.SaveChangesAsync();
         }
     }
-}
+
+        public async Task<bool> IsClientExists(int id)
+        {
+            return await _dbContext.Clients.AnyAsync(c => c.Id == id);
+        }
+
+    }
 }
