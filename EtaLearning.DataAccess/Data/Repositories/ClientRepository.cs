@@ -8,7 +8,7 @@ namespace EtaLearning.API.Data
 {
     public  class ClientRepository : IClientRepository
 {
-    private readonly AppDbContext _dbContext;
+    private readonly AppDbContext _dbContext; 
 
     public ClientRepository(AppDbContext dbContext)
     {
@@ -47,7 +47,7 @@ namespace EtaLearning.API.Data
           await  _dbContext.SaveChangesAsync();
         }
     }
-        public async Task<bool> IsClientExistsAsync(int id)
+        public async Task<bool> IsClientExists(int id)
         {
             return await _dbContext.Clients.AnyAsync(c => c.Id == id);
         }
