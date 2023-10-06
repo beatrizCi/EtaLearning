@@ -1,6 +1,7 @@
 ﻿using EtaLearning.API.Data;
 using Microsoft.AspNetCore.Mvc;
 
+
 [ApiController]
 [Route("api/[controller]")]
 public class ClientsController : ControllerBase
@@ -12,10 +13,17 @@ public class ClientsController : ControllerBase
         _clientRepository = clientRepository;
     }
 
+    [HttpGet("GetClients")]
+    public IActionResult GetClients()
+    {
+        var clients = _clientRepository.GetAllAsync();
+        return Ok(clients);
+    }
+
     [HttpGet("ById/{id}")]
     public async Task<IActionResult> GetClientById(int id)
     {
-        var client = await _clientRepository.GetById(id);
+        var client = await _clientRepository.GetByIdAsync(id);
 
         if (client == null)
         {
@@ -28,7 +36,7 @@ public class ClientsController : ControllerBase
     [HttpPut("Edit/{id}")]
     public async Task<IActionResult> EditClient(int id, [FromBody] string name)
     {
-        var existingClient = await _clientRepository.GetById(id);
+        var existingClient = await _clientRepository.GetByIdAsync(id);
 
         if (existingClient == null)
         {
@@ -47,7 +55,7 @@ public class ClientsController : ControllerBase
     [HttpDelete("Delete/{id}")]
     public async Task<IActionResult> DeleteClient(int id)
     {
-        var clientToDelete = await _clientRepository.GetById(id);
+        var clientToDelete = await _clientRepository.GetByIdAsync(id);
 
         if (clientToDelete == null)
         {
