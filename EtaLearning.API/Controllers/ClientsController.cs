@@ -1,97 +1,77 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using EtaLearning.API.Models; 
+﻿using EtaLearning.API.Data;
+using Microsoft.AspNetCore.Mvc;
 
-namespace EtaLearning.API.Controllers
+
+[ApiController]
+[Route("api/[controller]")]
+public class ClientsController : ControllerBase
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class ClientsController : ControllerBase
+    private readonly IClientRepository _clientRepository;
+
+    public ClientsController(IClientRepository clientRepository)
     {
-        private readonly AppDbContext _dbContext;
+        _clientRepository = clientRepository;
+    }
 
-        public ClientsController(AppDbContext dbContext)
+    [HttpGet("GetClients")]
+    public IActionResult GetClients()
+    {
+        var clients = _clientRepository.GetAllAsync();
+        return Ok(clients);
+    }
+
+    [HttpGet("ById/{id}")]
+    public async Task<IActionResult> GetClientById(int id)
+    {
+        var client = await _clientRepository.GetByIdAsync(id);
+
+        if (client == null)
         {
-            _dbContext = dbContext;
+            return NotFound();
         }
 
-        [HttpGet("GetClients")]
-        public IActionResult GetClients()
+        return Ok(client);
+    }
+
+    [HttpPut("Edit/{id}")]
+    public async Task<IActionResult> EditClient(int id, [FromBody] string name)
+    {
+        var existingClient = await _clientRepository.GetByIdAsync(id);
+
+        if (existingClient == null)
         {
-            var clients = _dbContext.Clients.ToList();
-            return Ok(clients);
+            return NotFound();
         }
 
-        [HttpPut("EditClient/{id}")]
-        public async Task<IActionResult> EditClient(int id, [FromBody] Clients updatedClient)
+        if (!string.IsNullOrEmpty(name))
         {
-            var existingClient = await _dbContext.Clients.FindAsync(id);
-
-            if (existingClient == null)
-            {
-                return NotFound();
-            }
-
-            if (!string.IsNullOrEmpty(updatedClient.Name))
-            {
-                existingClient.Name = updatedClient.Name;
-                await _dbContext.SaveChangesAsync(); 
-            }
-
-            return Ok(existingClient);
+            existingClient.Name = name;
+            await _clientRepository.UpdateAsync(existingClient);
         }
 
-        [HttpDelete("DeleteClient/{id}")]
-        public async Task<IActionResult> DeleteClient(int id)
+        return Ok(existingClient);
+    }
+
+    [HttpDelete("Delete/{id}")]
+    public async Task<IActionResult> DeleteClient(int id)
+    {
+        var clientToDelete = await _clientRepository.GetByIdAsync(id);
+
+        if (clientToDelete == null)
         {
-            var clientToDelete = await _dbContext.Clients.FindAsync(id);
-
-            if (clientToDelete == null)
-            {
-                return NotFound();
-            }
-
-            _dbContext.Clients.Remove(clientToDelete);
-            await _dbContext.SaveChangesAsync();
-
-            return NoContent();
+            return NotFound();
         }
 
-        [HttpPost("CreateNewClient")]
-        public IActionResult CreateNewClient([FromBody] string name)
-        {
-            if (string.IsNullOrEmpty(name))
-            {
-                return BadRequest("Client name is required.");
-            }
+        await _clientRepository.DeleteAsync(id);
 
-            if (_dbContext.Clients.Any(c => c.Name == name))
-            {
-                return BadRequest("A client with the same name already exists.");
-            }
+        return NoContent();
+    }
 
-            var newClient = new Clients
-            {
-                Name = name,
-                CreationDate = DateTime.UtcNow
-            };
+    [HttpGet("CheckExistence/{id}")]
+    public async Task<IActionResult> CheckClientExistence(int id)
+    {
+        var exists = await _clientRepository.IsClientExistsAsync(id);
 
-            _dbContext.Clients.AddAsync(newClient);
-            _dbContext.SaveChangesAsync();
-
-            return CreatedAtAction(nameof(GetClientById), new { id = newClient.Id }, newClient);
-        }
-
-        [HttpGet("GetClientById/{id}")]
-        public async Task<IActionResult> GetClientById(int id)
-        {
-            var client = await _dbContext.Clients.FindAsync(id);
-
-            if (client == null)
-            {
-                return NotFound(); 
-            }
-
-            return Ok(client); 
-        }
+        return Ok(exists);
     }
 }
