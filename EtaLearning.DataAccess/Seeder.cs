@@ -1,12 +1,7 @@
 ﻿using EtaLearning.API.Data.Entities;
 using EtaLearning.API.Data;
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
+using EtaLearning.DataAccess.Data.Entities;
 
 namespace EtaLearning.DataAccess
 {
@@ -26,6 +21,17 @@ namespace EtaLearning.DataAccess
                     dbContext.SaveChanges();
                 }
 
+                if (!dbContext.SmartDevices.Any())
+                {
+                    dbContext.SmartDevices.AddRange(
+                           new SmartDevice { Name = "WMZ 00006696", Created = DateTime.UtcNow, Id = 
+                           new Guid("00A1B1E8-C4A4-4ADE-BCC9-0B95CFEFD209"), Kind = 2,
+                           Type = 201,
+                           }
+                          
+                       );
+                    dbContext.SaveChanges();
+                }
             }
         }
     }
