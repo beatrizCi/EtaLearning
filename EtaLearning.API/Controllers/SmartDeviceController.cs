@@ -15,96 +15,69 @@ namespace EtaLearning.API.Controllers
             _smartdeviceRepository = smartdeviceRepository;
         }
 
-        [HttpGet("GetClients")]
+        [HttpGet("get-clients")]
         public async Task<IActionResult> GetClients()
         {
-            try
-            {
-                var clients = await _smartdeviceRepository.GetAllAsync();
-                return Ok(clients);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
+            var clients = await _smartdeviceRepository.GetAllAsync();
+            return Ok(clients);
         }
 
-        [HttpGet("ById/{id}")]
-        public async Task<IActionResult> GetClientById(int id)
+        [HttpGet("by-id/{id}")]
+        public async Task<IActionResult> GetClientById(string id)
         {
-            try
+            if (!Guid.TryParse(id, out Guid guidId))
             {
-                Guid guidId = new Guid(id.ToString());
-
-                var client = await _smartdeviceRepository.GetByIdAsync(guidId);
-
-                if (client == null)
-                {
-                    return NotFound($"Client with Id {id} not found.");
-                }
-
-                return Ok(client);
+                return BadRequest("Invalid Id format. Please provide a valid GUID.");
             }
-            catch (Exception ex)
+
+            var client = await _smartdeviceRepository.GetByIdAsync(guidId);
+
+            if (client == null)
             {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
+                return NotFound($"Client with Id {guidId} not found.");
             }
+
+            return Ok(client);
         }
 
-        [HttpPut("Edit/{id}")]
+        [HttpPut("edit/{id}")]
         public async Task<IActionResult> EditClient(Guid id, [FromBody] string name)
         {
-            try
+            var existingClient = await _smartdeviceRepository.GetByIdAsync(id);
+
+            if (existingClient == null)
             {
-                var existingClient = await _smartdeviceRepository.GetByIdAsync(id);
-
-                if (existingClient == null)
-                {
-                    return NotFound($"Client with Id {id} not found.");
-                }
-
-                if (existingClient.Name != name)
-                {
-                    return Conflict($"The client's name has been updated by another user. Refresh your data and try again.");
-                }
-
-                if (!string.IsNullOrEmpty(name))
-                {
-                    existingClient.Name = name;
-                    await _smartdeviceRepository.UpdateAsync(existingClient);
-                    return Ok(existingClient);
-                }
-                else
-                {
-                    return BadRequest("Name cannot be empty.");
-                }
+                return NotFound($"Client with Id {id} not found.");
             }
-            catch (Exception ex)
+
+         
+            if (existingClient.Name != name)
             {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
+                return Conflict($"The client's name has been updated by another user. Refresh your data and try again.");
             }
+
+            if (string.IsNullOrEmpty(name))
+            {
+                return BadRequest("Name cannot be empty.");
+            }
+
+            existingClient.Name = name;
+            await _smartdeviceRepository.UpdateAsync(existingClient);
+            return Ok(existingClient);
         }
 
-        [HttpDelete("Delete/{id}")]
+        [HttpDelete("delete/{id}")]
         public async Task<IActionResult> DeleteClient(Guid id)
         {
-            try
-            {
-                var clientToDelete = await _smartdeviceRepository.GetByIdAsync(id);
+            var clientToDelete = await _smartdeviceRepository.GetByIdAsync(id);
 
-                if (clientToDelete == null)
-                {
-                    return NotFound($"Client with Id {id} not found.");
-                }
-
-                await _smartdeviceRepository.DeleteAsync(id);
-                return NoContent();
-            }
-            catch (Exception ex)
+            if (clientToDelete == null)
             {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
+                return NotFound($"Client with Id {id} not found.");
             }
+
+            await _smartdeviceRepository.DeleteAsync(id);
+            return Ok();
         }
-
     }
 }

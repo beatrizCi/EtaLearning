@@ -1,6 +1,7 @@
 ﻿using EtaLearning.API.Data;
 using Microsoft.AspNetCore.Mvc;
 
+namespace EtaLearning.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
@@ -13,14 +14,14 @@ public class ClientsController : ControllerBase
         _clientRepository = clientRepository;
     }
 
-    [HttpGet("GetClients")]
+    [HttpGet("get-clients")]
     public IActionResult GetClients()
     {
         var clients = _clientRepository.GetAllAsync();
         return Ok(clients);
     }
 
-    [HttpGet("ById/{id}")]
+    [HttpGet("by-id/{id}")]
     public async Task<IActionResult> GetClientById(int id)
     {
         var client = await _clientRepository.GetByIdAsync(id);
@@ -33,7 +34,7 @@ public class ClientsController : ControllerBase
         return Ok(client);
     }
 
-    [HttpPut("Edit/{id}")]
+    [HttpPut("edit/{id}")]
     public async Task<IActionResult> EditClient(int id, [FromBody] string name)
     {
         var existingClient = await _clientRepository.GetByIdAsync(id);
@@ -52,7 +53,7 @@ public class ClientsController : ControllerBase
         return Ok(existingClient);
     }
 
-    [HttpDelete("Delete/{id}")]
+    [HttpDelete("delete/{id}")]
     public async Task<IActionResult> DeleteClient(int id)
     {
         var clientToDelete = await _clientRepository.GetByIdAsync(id);
@@ -64,10 +65,10 @@ public class ClientsController : ControllerBase
 
         await _clientRepository.DeleteAsync(id);
 
-        return NoContent();
+        return Ok();
     }
 
-    [HttpGet("CheckExistence/{id}")]
+    [HttpGet("check-existence/{id}")]
     public async Task<IActionResult> CheckClientExistence(int id)
     {
         var exists = await _clientRepository.IsClientExistsAsync(id);
