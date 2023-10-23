@@ -15,13 +15,6 @@ namespace EtaLearning.API.Controllers
             _smartdeviceRepository = smartdeviceRepository;
         }
 
-        [HttpGet("get-clients")]
-        public async Task<IActionResult> GetClients()
-        {
-            var clients = await _smartdeviceRepository.GetAllAsync();
-            return Ok(clients);
-        }
-
         [HttpGet("by-id/{id}")]
         public async Task<IActionResult> GetClientById(string id)
         {

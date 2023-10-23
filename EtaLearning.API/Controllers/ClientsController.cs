@@ -1,4 +1,5 @@
 ﻿using EtaLearning.API.Data;
+using EtaLearning.API.Data.Entities;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EtaLearning.API.Controllers;
@@ -14,14 +15,14 @@ public class ClientsController : ControllerBase
         _clientRepository = clientRepository;
     }
 
-    [HttpGet("get-clients")]
+    [HttpGet()]
     public IActionResult GetClients()
     {
         var clients = _clientRepository.GetAllAsync();
         return Ok(clients);
     }
 
-    [HttpGet("by-id/{id}")]
+    [HttpGet("{id}")]
     public async Task<IActionResult> GetClientById(int id)
     {
         var client = await _clientRepository.GetByIdAsync(id);
@@ -34,7 +35,7 @@ public class ClientsController : ControllerBase
         return Ok(client);
     }
 
-    [HttpPut("edit/{id}")]
+    [HttpPut("{id}")]
     public async Task<IActionResult> EditClient(int id, [FromBody] string name)
     {
         var existingClient = await _clientRepository.GetByIdAsync(id);
@@ -53,7 +54,18 @@ public class ClientsController : ControllerBase
         return Ok(existingClient);
     }
 
-    [HttpDelete("delete/{id}")]
+    [HttpPost("{id}")]
+    public async Task<IActionResult> CreateClient([FromBody] Client client)
+    {
+        if (client == null)
+        {
+            return BadRequest("Invalid client data. Please provide valid data.");
+        }
+        await _clientRepository.AddAsync(client);
+        return CreatedAtAction(nameof(GetClientById), new { id = client.Id }, client);
+    }
+
+    [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteClient(int id)
     {
         var clientToDelete = await _clientRepository.GetByIdAsync(id);
@@ -64,11 +76,11 @@ public class ClientsController : ControllerBase
         }
 
         await _clientRepository.DeleteAsync(id);
-
+        
         return Ok();
     }
 
-    [HttpGet("check-existence/{id}")]
+    [HttpGet("{id}/exist")]
     public async Task<IActionResult> CheckClientExistence(int id)
     {
         var exists = await _clientRepository.IsClientExistsAsync(id);
