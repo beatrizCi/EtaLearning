@@ -1,5 +1,4 @@
 ﻿using EtaLearning.API.Data;
-using EtaLearning.DataAccess.Data.Interfaces;
 using EtaLearning.DataAccess.Data.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -11,7 +10,6 @@ namespace EtaLearning.DataAccess
     {
         public static void AddDataAccess(this IServiceCollection services, IConfiguration configuration)
         {
-            
             services.AddScoped<ISmartDeviceRepository, SmartDeviceRepository>();
             services.AddScoped<IClientRepository, ClientRepository>();
             services.AddDbContext<AppDbContext>(options =>

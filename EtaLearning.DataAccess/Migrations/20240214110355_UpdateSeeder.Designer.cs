@@ -9,29 +9,27 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace EtaLearning.API.Migrations
+namespace EtaLearning.DataAccess.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20231010124220_AddSmartDeviceTable")]
-    partial class AddSmartDeviceTable
+    [Migration("20240214110355_UpdateSeeder")]
+    partial class UpdateSeeder
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "7.0.11")
+                .HasAnnotation("ProductVersion", "8.0.0")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("EtaLearning.API.Data.Entities.Client", b =>
+            modelBuilder.Entity("EtaLearning.API.Data.Entities.DbClient", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("ClientId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("CreationDate")
                         .HasColumnType("datetime2");
@@ -39,7 +37,10 @@ namespace EtaLearning.API.Migrations
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("Id");
+                    b.Property<Guid>("SmartDeviceId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("ClientId");
 
                     b.ToTable("Clients");
                 });
@@ -48,6 +49,9 @@ namespace EtaLearning.API.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ClientId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("Created")
@@ -64,7 +68,25 @@ namespace EtaLearning.API.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("ClientId");
+
                     b.ToTable("SmartDevices");
+                });
+
+            modelBuilder.Entity("EtaLearning.DataAccess.Data.Entities.SmartDevice", b =>
+                {
+                    b.HasOne("EtaLearning.API.Data.Entities.DbClient", "Client")
+                        .WithMany("SmartDevices")
+                        .HasForeignKey("ClientId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Client");
+                });
+
+            modelBuilder.Entity("EtaLearning.API.Data.Entities.DbClient", b =>
+                {
+                    b.Navigation("SmartDevices");
                 });
 #pragma warning restore 612, 618
         }

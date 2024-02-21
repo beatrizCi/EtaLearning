@@ -1,90 +1,118 @@
-﻿using EtaLearning.API.Data;
-using EtaLearning.API.Data.Entities;
+﻿using EtaLearning.Core.Service;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 
-namespace EtaLearning.API.Controllers;
 
-[ApiController]
-[Route("api/[controller]")]
-public class ClientsController : ControllerBase
+namespace EtaLearning.API.Controllers
 {
-    private readonly IClientRepository _clientRepository;
-
-    public ClientsController(IClientRepository clientRepository)
+    [ApiController]
+    [Route("api/[controller]")]
+    public class ClientsController : ControllerBase
     {
-        _clientRepository = clientRepository;
-    }
+        private readonly IEtaLearningService _etaLearningService;
+        private readonly ILogger<ClientsController> _logger;
 
-    [HttpGet()]
-    public IActionResult GetClients()
-    {
-        var clients = _clientRepository.GetAllAsync();
-        return Ok(clients);
-    }
-
-    [HttpGet("{id}")]
-    public async Task<IActionResult> GetClientById(int id)
-    {
-        var client = await _clientRepository.GetByIdAsync(id);
-
-        if (client == null)
+        public ClientsController(IEtaLearningService etaLearningService, ILogger<ClientsController> logger)
         {
-            return NotFound();
+            _etaLearningService = etaLearningService;
+            _logger = logger;
         }
 
-        return Ok(client);
-    }
-
-    [HttpPut("{id}")]
-    public async Task<IActionResult> EditClient(int id, [FromBody] string name)
-    {
-        var existingClient = await _clientRepository.GetByIdAsync(id);
-
-        if (existingClient == null)
+        [HttpGet]
+        public async Task<IActionResult> GetClientsAsync()
         {
-            return NotFound();
+            var clients = await _etaLearningService.GetAllClientsAsync();
+            return Ok(clients);
         }
 
-        if (!string.IsNullOrEmpty(name))
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetClientById(int id)
         {
-            existingClient.Name = name;
-            await _clientRepository.UpdateAsync(existingClient);
+            var client = await _etaLearningService.GetByIdAsync(id);
+
+            if (client == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(client);
         }
 
-        return Ok(existingClient);
-    }
-
-    [HttpPost("{id}")]
-    public async Task<IActionResult> CreateClient([FromBody] Client client)
-    {
-        if (client == null)
+        [HttpPut("{id}")]
+        public async Task<IActionResult> EditClient(int id, [FromBody] DataAccess.Data.Entities.DbClient client)
         {
-            return BadRequest("Invalid client data. Please provide valid data.");
+            if (id != client.Id)
+            {
+                ModelState.AddModelError("Id", "Client ID in URL does not match client ID in request body.");
+            }
+
+            if (client.Id == 0)
+            {
+                ModelState.AddModelError("Id", "Invalid client ID format.");
+            }
+
+            if (client.SmartDevices != null && client.SmartDevices.Any())
+            {
+                foreach (var smartDevice in client.SmartDevices)
+                {
+                    if (id != client.Id.GetHashCode())
+
+                    {
+                        ModelState.AddModelError("SmartDeviceId", "Invalid smart device ID format.");
+                    }
+                }
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var existingClient = await _etaLearningService.GetByIdAsync(id);
+
+            if (existingClient == null)
+            {
+                return NotFound();
+            }
+
+            existingClient.Name = client.Name;
+
+            await _etaLearningService.UpdateAsync(existingClient);
+
+            return Ok(existingClient);
         }
-        await _clientRepository.AddAsync(client);
-        return CreatedAtAction(nameof(GetClientById), new { id = client.Id }, client);
-    }
 
-    [HttpDelete("{id}")]
-    public async Task<IActionResult> DeleteClient(int id)
-    {
-        var clientToDelete = await _clientRepository.GetByIdAsync(id);
-
-        if (clientToDelete == null)
+        [HttpPost]
+        public async Task<ActionResult<DataAccess.Data.Entities.DbClient>> PostClient([FromBody] DataAccess.Data.Entities.DbClient client)
         {
-            return NotFound();
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
+
+                var createdClient = await _etaLearningService.CreateClientAsync(client);
+
+                // Return the created client in the response body
+                return CreatedAtAction(nameof(GetClientById), new { id = createdClient.Id }, createdClient);
+            }
+            catch (Exception ex)
+            {
+                // Log the exception and its inner exception details
+                _logger.LogError(ex, "An error occurred while processing the request.");
+
+                // Return a bad request response with the error message
+                return BadRequest($"Failed to create client: {ex.Message}");
+            }
         }
 
-        await _clientRepository.DeleteAsync(id);
-        
-        return Ok();
-    }
 
-    [HttpGet("{id}/exist")]
-    public async Task<IActionResult> CheckClientExistence(int id)
-    {
-        var exists = await _clientRepository.IsClientExistsAsync(id);
-
-        return Ok(exists);
+        [HttpGet("{id}/exist")]
+        public async Task<IActionResult> CheckClientExistence(int id)
+        {
+            var exists = await _etaLearningService.IsClientExistsAsync(id);
+            return Ok(exists);
+        }
     }
 }

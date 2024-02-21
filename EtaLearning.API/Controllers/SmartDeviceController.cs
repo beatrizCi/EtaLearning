@@ -1,6 +1,6 @@
-﻿using EtaLearning.DataAccess.Data.Interfaces;
-using Microsoft.AspNetCore.Mvc;
-
+﻿using Microsoft.AspNetCore.Mvc;
+using EtaLearning.DataAccess.Data.Entities;
+using EtaLearning.Core.Service;
 
 namespace EtaLearning.API.Controllers
 {
@@ -8,45 +8,49 @@ namespace EtaLearning.API.Controllers
     [Route("api/[controller]")]
     public class SmartDeviceController : ControllerBase
     {
-        private readonly ISmartDeviceRepository _smartdeviceRepository;
+        private readonly IEtaLearningService _etaLearningService;
+        private object _dbContext;
+        private readonly ISmartDeviceRepository _smartDeviceRepository;
 
-        public SmartDeviceController(ISmartDeviceRepository smartdeviceRepository)
+        public SmartDeviceController(IEtaLearningService etaLearningService, ISmartDeviceRepository smartDeviceRepository)
         {
-            _smartdeviceRepository = smartdeviceRepository;
+            _etaLearningService = etaLearningService;
+            _smartDeviceRepository = smartDeviceRepository ?? throw new ArgumentNullException(nameof(smartDeviceRepository));
         }
+
+        [HttpGet("all")]
+        public async Task<IEnumerable<SmartDevice>> GetAllSmartDevicesAsync() => 
+            await _etaLearningService.GetAllAsync() as IEnumerable<SmartDevice>;
 
         [HttpGet("by-id/{id}")]
-        public async Task<IActionResult> GetClientById(string id)
+        public async Task<IActionResult> GetSmartDeviceById(int id)
         {
-            if (!Guid.TryParse(id, out Guid guidId))
+            var smartDeviceId = id;
+
+            var smartDevice = await _etaLearningService.GetByIdAsync(smartDeviceId);
+
+            if (smartDevice == null)
             {
-                return BadRequest("Invalid Id format. Please provide a valid GUID.");
+                return NotFound($"SmartDevice with Id {smartDeviceId} not found.");
             }
 
-            var client = await _smartdeviceRepository.GetByIdAsync(guidId);
-
-            if (client == null)
-            {
-                return NotFound($"Client with Id {guidId} not found.");
-            }
-
-            return Ok(client);
+            return Ok(smartDevice);
         }
 
-        [HttpPut("edit/{id}")]
-        public async Task<IActionResult> EditClient(Guid id, [FromBody] string name)
-        {
-            var existingClient = await _smartdeviceRepository.GetByIdAsync(id);
 
-            if (existingClient == null)
+        [HttpPut("edit/{id}")]
+        public async Task<IActionResult> EditSmartDevice(int id, [FromBody] string name)
+        {
+            var existingSmartDevice = await _etaLearningService.GetByIdAsync(id);
+
+            if (existingSmartDevice == null)
             {
-                return NotFound($"Client with Id {id} not found.");
+                return NotFound($"SmartDevice with Id {id} not found.");
             }
 
-         
-            if (existingClient.Name != name)
+            if (existingSmartDevice.Name != name)
             {
-                return Conflict($"The client's name has been updated by another user. Refresh your data and try again.");
+                return Conflict($"The SmartDevice's name has been updated by another user. Refresh your data and try again.");
             }
 
             if (string.IsNullOrEmpty(name))
@@ -54,23 +58,56 @@ namespace EtaLearning.API.Controllers
                 return BadRequest("Name cannot be empty.");
             }
 
-            existingClient.Name = name;
-            await _smartdeviceRepository.UpdateAsync(existingClient);
-            return Ok(existingClient);
+            existingSmartDevice.Name = name;
+            await _etaLearningService.UpdateSmartDeviceAsync( existingSmartDevice);
+
+            return Ok(existingSmartDevice);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CreateSmartDevice([FromBody] SmartDevice smartDevice)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
+
+                await _etaLearningService.CreateSmartDeviceAsync(smartDevice);
+
+                return CreatedAtAction(nameof(GetSmartDeviceById), new { id = smartDevice.Id }, smartDevice);
+            }
+            catch (Exception ex)
+            {
+
+                return StatusCode(500, "Failed to create smart device");
+            }
+        }
+
+
+        [HttpGet("{id}/exist")]
+        public async Task<IActionResult> CheckSmartDeviceExistence(Guid id)
+        {
+          
+            bool exists = await _etaLearningService.IsSmartDeviceExistsAsync(id);
+            _ = await _etaLearningService.IsSmartDeviceExistsAsync(id);
+
+            return Ok(exists);
         }
 
         [HttpDelete("delete/{id}")]
-        public async Task<IActionResult> DeleteClient(Guid id)
+        public async Task<IActionResult> DeleteSmartDevice(Guid id)
         {
-            var clientToDelete = await _smartdeviceRepository.GetByIdAsync(id);
+            var smartDeviceToDelete = await _etaLearningService.GetByIdAsync(id);
 
-            if (clientToDelete == null)
+            if (smartDeviceToDelete == null)
             {
-                return NotFound($"Client with Id {id} not found.");
+                return NotFound($"SmartDevice with Id {id} not found.");
             }
 
-            await _smartdeviceRepository.DeleteAsync(id);
+            await _etaLearningService.DeleteAsync(id);
             return Ok();
         }
     }
-}
+    }
