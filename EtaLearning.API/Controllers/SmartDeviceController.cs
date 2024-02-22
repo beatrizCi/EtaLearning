@@ -1,11 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using EtaLearning.DataAccess.Data.Entities;
-using EtaLearning.Core.Service;
+using EtaLearning.Core.Services;
 
 namespace EtaLearning.API.Controllers
 {
     [ApiController]
-    [Route("api/[smartdevice]")]
+    [Route("api/smart-device")]
     public class SmartDeviceController : ControllerBase
     {
         private readonly IEtaLearningService _etaLearningService;
@@ -18,11 +18,11 @@ namespace EtaLearning.API.Controllers
             _smartDeviceRepository = smartDeviceRepository ?? throw new ArgumentNullException(nameof(smartDeviceRepository));
         }
 
-        [HttpGet("all")]
+        [HttpGet("get-all")]
         public async Task<IEnumerable<SmartDevice>> GetAllSmartDevicesAsync() => 
             await _etaLearningService.GetAllAsync() as IEnumerable<SmartDevice>;
 
-        [HttpGet("by-id/{id}")]
+        [HttpGet("get/{id}")]
         public async Task<IActionResult> GetSmartDeviceById(int id)
         {
             var smartDeviceId = id;
@@ -84,7 +84,7 @@ namespace EtaLearning.API.Controllers
             }
         }
 
-        [HttpGet("{id}/exist")]
+        [HttpGet("exists/{id}")]
         public async Task<IActionResult> CheckSmartDeviceExistence(Guid id)
         {
           

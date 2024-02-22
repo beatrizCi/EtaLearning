@@ -1,4 +1,4 @@
-﻿using EtaLearning.Core.Service;
+﻿using EtaLearning.Core.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace EtaLearning.API.Controllers
 {
     [ApiController]
-    [Route("api/[clients]")]
+    [Route("api/clients")]
     public class ClientsController : ControllerBase
     {
         private readonly IEtaLearningService _etaLearningService;
@@ -20,14 +20,14 @@ namespace EtaLearning.API.Controllers
             _logger = logger;
         }
 
-        [HttpGet("clients")]
+        [HttpGet("get-clients")]
         public async Task<IActionResult> GetClientsAsync()
         {
             var clients = await _etaLearningService.GetAllClientsAsync();
             return Ok(clients);
         }
 
-        [HttpGet("clients/{id}")]
+        [HttpGet("get/{id}")]
         public async Task<IActionResult> GetClientById(int id)
         {
             var client = await _etaLearningService.GetByIdAsync(id);
@@ -40,7 +40,7 @@ namespace EtaLearning.API.Controllers
             return Ok(client);
         }
 
-        [HttpPut("clients/{id}")]
+        [HttpPut("edit/{id}")]
         public async Task<IActionResult> EditClient(int id, [FromBody] DataAccess.Data.Entities.DbClient client)
         {
             if (id != client.Id)
@@ -84,7 +84,7 @@ namespace EtaLearning.API.Controllers
             return Ok(existingClient);
         }
 
-        [HttpPost("clients")]
+        [HttpPost("create")]
         public async Task<ActionResult<DataAccess.Data.Entities.DbClient>> PostClient([FromBody] DataAccess.Data.Entities.DbClient client)
         {
             try
@@ -109,7 +109,7 @@ namespace EtaLearning.API.Controllers
             }
         }
 
-        [HttpGet("clients/{id}/exist")]
+        [HttpGet("exist/{id}")]
         public async Task<IActionResult> CheckClientExistence(int id)
         {
             var exists = await _etaLearningService.IsClientExistsAsync(id);

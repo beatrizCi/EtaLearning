@@ -3,7 +3,7 @@ using EtaLearning.API.Data;
 using EtaLearning.DataAccess.Data.Repositories;
 using EtaLearning.DataAccess;
 using Microsoft.OpenApi.Models;
-using EtaLearning.Core.Service;
+using EtaLearning.Core.Services;
 
 using Serilog;
 using EtaLearning.API;

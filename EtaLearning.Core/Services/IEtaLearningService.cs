@@ -1,6 +1,6 @@
 ﻿using EtaLearning.DataAccess.Data.Entities;
 
-namespace EtaLearning.Core.Service
+namespace EtaLearning.Core.Services
 {
     public interface IEtaLearningService
     {

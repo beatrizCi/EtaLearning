@@ -4,7 +4,7 @@ using EtaLearning.DataAccess.Data.Entities;
 using Microsoft.Extensions.Logging;
 
 
-namespace EtaLearning.Core.Service
+namespace EtaLearning.Core.Services
 {
     public class EtaLearningService : IEtaLearningService
     {
