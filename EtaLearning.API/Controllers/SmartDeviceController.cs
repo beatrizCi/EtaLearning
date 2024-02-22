@@ -5,7 +5,7 @@ using EtaLearning.Core.Service;
 namespace EtaLearning.API.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/[smartdevice]")]
     public class SmartDeviceController : ControllerBase
     {
         private readonly IEtaLearningService _etaLearningService;
@@ -37,7 +37,6 @@ namespace EtaLearning.API.Controllers
             return Ok(smartDevice);
         }
 
-
         [HttpPut("edit/{id}")]
         public async Task<IActionResult> EditSmartDevice(int id, [FromBody] string name)
         {
@@ -64,7 +63,7 @@ namespace EtaLearning.API.Controllers
             return Ok(existingSmartDevice);
         }
 
-        [HttpPost]
+        [HttpPost("create")]
         public async Task<IActionResult> CreateSmartDevice([FromBody] SmartDevice smartDevice)
         {
             try
@@ -84,7 +83,6 @@ namespace EtaLearning.API.Controllers
                 return StatusCode(500, "Failed to create smart device");
             }
         }
-
 
         [HttpGet("{id}/exist")]
         public async Task<IActionResult> CheckSmartDeviceExistence(Guid id)
