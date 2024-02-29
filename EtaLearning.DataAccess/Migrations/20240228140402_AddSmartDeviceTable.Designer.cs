@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EtaLearning.DataAccess.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20240219110021_ChangeIdColumnTypeNew")]
-    partial class ChangeIdColumnTypeNew
+    [Migration("20240228140402_AddSmartDeviceTable")]
+    partial class AddSmartDeviceTable
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -25,7 +25,7 @@ namespace EtaLearning.DataAccess.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("EtaLearning.API.Data.Entities.DbClient", b =>
+            modelBuilder.Entity("EtaLearning.DataAccess.Data.Entities.DbClient", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -77,7 +77,7 @@ namespace EtaLearning.DataAccess.Migrations
 
             modelBuilder.Entity("EtaLearning.DataAccess.Data.Entities.SmartDevice", b =>
                 {
-                    b.HasOne("EtaLearning.API.Data.Entities.DbClient", "Client")
+                    b.HasOne("EtaLearning.DataAccess.Data.Entities.DbClient", "Client")
                         .WithMany("SmartDevices")
                         .HasForeignKey("ClientId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -86,7 +86,7 @@ namespace EtaLearning.DataAccess.Migrations
                     b.Navigation("Client");
                 });
 
-            modelBuilder.Entity("EtaLearning.API.Data.Entities.DbClient", b =>
+            modelBuilder.Entity("EtaLearning.DataAccess.Data.Entities.DbClient", b =>
                 {
                     b.Navigation("SmartDevices");
                 });

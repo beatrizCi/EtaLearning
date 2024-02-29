@@ -65,6 +65,20 @@ namespace EtaLearning.Core.Services
         {
             await _clientRepository.UpdateAsync(client);
         }
+        public async Task<DbClient> GetByIdAsync(int id)
+        {
+            return await _clientRepository.GetByIdAsync(id);
+        }
+        public async Task DeleteClientAsync(int id)
+        {
+            var client = await _dbContext.Clients.FindAsync(id);
+
+            if (client != null)
+            {
+                _dbContext.Clients.Remove(client);
+                await _dbContext.SaveChangesAsync();
+            }
+        }
 
         public async Task<bool> IsClientExistsAsync(int id)
         {
@@ -74,11 +88,6 @@ namespace EtaLearning.Core.Services
         public async Task UpdateClientAsync(DbClient existingClient)
         {
             await _clientRepository.UpdateAsync(existingClient);
-        }
-
-        public async Task DeleteAsync(Guid Id)
-        {
-            await _clientRepository.DeleteAsync(Id);
         }
 
         public async Task<bool> IsSmartDeviceExistsAsync(Guid id)
@@ -108,27 +117,13 @@ namespace EtaLearning.Core.Services
             return await _dbContext.SmartDevices.ToListAsync();
         }
 
-        public async Task<DbClient> GetByIdAsync(int id)
-        {
-            return await _clientRepository.GetByIdAsync(id);
-        }
-
         public Task UpdateSmartDeviceAsync(DataAccess.Data.Entities.DbClient existingSmartDevice)
         {
             throw new NotImplementedException();
         }
 
-        public async Task DeleteClientAsync(int id)
-        {
-            var client = await _dbContext.Clients.FindAsync(id);
-
-            if (client != null)
-            {
-                _dbContext.Clients.Remove(client);
-                await _dbContext.SaveChangesAsync();
-            }
-        }
-        public async Task<SmartDevice> GetByIdAsync(Guid id)
+     
+        public async Task<SmartDevice> GetSmartDeviceByIdAsync(int id)
         {
             return await _dbContext.SmartDevices.FindAsync(id);
         }
@@ -138,5 +133,24 @@ namespace EtaLearning.Core.Services
          
             await _smartDeviceRepository.AddAsync(smartDevice);
         }
+
+        Task<bool> IEtaLearningService.DeleteSmartDeviceAsync(int id)
+        {
+            var smartDevice = _dbContext.SmartDevices.Find(id);
+            if (smartDevice == null)
+            {
+                return Task.FromResult(false); // Device not found, unable to delete
+            }
+
+            _dbContext.SmartDevices.Remove(smartDevice);
+            _dbContext.SaveChanges();
+            return Task.FromResult(true); // Device deleted successfully
+        }
+
+        public Task UpdateSmartDeviceAsync(SmartDevice existingSmartDevice)
+        {
+            throw new NotImplementedException();
+        }
+
     }
 }

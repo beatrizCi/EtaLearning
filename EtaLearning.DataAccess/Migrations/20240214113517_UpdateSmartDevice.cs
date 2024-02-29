@@ -1,30 +1,31 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
-#nullable disable
-
 namespace EtaLearning.DataAccess.Migrations
 {
-    /// <inheritdoc />
     public partial class UpdateSmartDevice : Migration
     {
-        /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<DateTime>(
-                name: "LastModified",
-                table: "SmartDevices",
-                type: "datetime2",
-                nullable: false,
-                defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified));
+            if (!migrationBuilder.IsSqlServer())
+            {
+                return;
+            }
+
+            // SQL query to check if the column exists
+            var sql = @"
+                SELECT COUNT(*)
+                FROM INFORMATION_SCHEMA.COLUMNS 
+                WHERE TABLE_NAME = 'SmartDevices' 
+                AND COLUMN_NAME = 'Description';";
+
+            // Execute the SQL query
+            migrationBuilder.Sql(sql);
         }
 
-        /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "LastModified",
-                table: "SmartDevices");
+            // No action needed in the Down method
         }
     }
 }

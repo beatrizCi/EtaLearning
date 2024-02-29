@@ -14,12 +14,14 @@ namespace EtaLearning.Core.Services
 
         // Smart Device Methods
         Task<bool> IsSmartDeviceExistsAsync(Guid id);
-        Task DeleteAsync(Guid id);
+        Task<bool> DeleteSmartDeviceAsync(int id);
+
         Task UpdateAsync(DbClient existingClient);
         Task<IEnumerable<SmartDevice>> GetAllAsync();
         Task UpdateSmartDeviceAsync(DbClient existingClient,SmartDevice existingSmartDevice, SmartDevice updatedSmartDevice);
         Task UpdateSmartDeviceAsync(DbClient existingSmartDevice);
-        Task<SmartDevice> GetByIdAsync(Guid id);
+        Task<SmartDevice> GetSmartDeviceByIdAsync(int id);
         Task CreateSmartDeviceAsync(SmartDevice smartDevice);
+        Task UpdateSmartDeviceAsync(SmartDevice existingSmartDevice);
     }
 }

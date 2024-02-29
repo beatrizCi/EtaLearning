@@ -40,7 +40,7 @@ namespace EtaLearning.API.Controllers
         [HttpPut("edit/{id}")]
         public async Task<IActionResult> EditSmartDevice(int id, [FromBody] string name)
         {
-            var existingSmartDevice = await _etaLearningService.GetByIdAsync(id);
+            var existingSmartDevice = await _etaLearningService.GetSmartDeviceByIdAsync(id);
 
             if (existingSmartDevice == null)
             {
@@ -95,7 +95,7 @@ namespace EtaLearning.API.Controllers
         }
 
         [HttpDelete("delete/{id}")]
-        public async Task<IActionResult> DeleteSmartDevice(Guid id)
+        public async Task<IActionResult> DeleteSmartDevice(int id)
         {
             var smartDeviceToDelete = await _etaLearningService.GetByIdAsync(id);
 
@@ -104,7 +104,7 @@ namespace EtaLearning.API.Controllers
                 return NotFound($"SmartDevice with Id {id} not found.");
             }
 
-            await _etaLearningService.DeleteAsync(id);
+            await _etaLearningService.DeleteSmartDeviceAsync(id);
             return Ok();
         }
     }

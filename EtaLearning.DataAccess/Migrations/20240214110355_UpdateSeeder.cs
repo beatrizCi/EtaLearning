@@ -12,7 +12,7 @@ namespace EtaLearning.DataAccess.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AddColumn<Guid>(
-                name: "SmartDeviceId",
+                name: "NewSmartDeviceId", // Change the column name to a unique name
                 table: "Clients",
                 type: "uniqueidentifier",
                 nullable: false,
@@ -23,7 +23,7 @@ namespace EtaLearning.DataAccess.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "SmartDeviceId",
+                name: "NewSmartDeviceId", // Use the same column name used in the Up method
                 table: "Clients");
         }
     }

@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EtaLearning.DataAccess.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20240219093434_ChangeIdColumnType")]
-    partial class ChangeIdColumnType
+    [Migration("20240226182743_AddNewClientsTable")]
+    partial class AddNewClientsTable
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -25,7 +25,7 @@ namespace EtaLearning.DataAccess.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("EtaLearning.API.Data.Entities.DbClient", b =>
+            modelBuilder.Entity("EtaLearning.DataAccess.Data.Entities.DbClient", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -46,11 +46,9 @@ namespace EtaLearning.DataAccess.Migrations
 
             modelBuilder.Entity("EtaLearning.DataAccess.Data.Entities.SmartDevice", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("ClientId")
                         .HasColumnType("int");
@@ -79,7 +77,7 @@ namespace EtaLearning.DataAccess.Migrations
 
             modelBuilder.Entity("EtaLearning.DataAccess.Data.Entities.SmartDevice", b =>
                 {
-                    b.HasOne("EtaLearning.API.Data.Entities.DbClient", "Client")
+                    b.HasOne("EtaLearning.DataAccess.Data.Entities.DbClient", "Client")
                         .WithMany("SmartDevices")
                         .HasForeignKey("ClientId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -88,7 +86,7 @@ namespace EtaLearning.DataAccess.Migrations
                     b.Navigation("Client");
                 });
 
-            modelBuilder.Entity("EtaLearning.API.Data.Entities.DbClient", b =>
+            modelBuilder.Entity("EtaLearning.DataAccess.Data.Entities.DbClient", b =>
                 {
                     b.Navigation("SmartDevices");
                 });

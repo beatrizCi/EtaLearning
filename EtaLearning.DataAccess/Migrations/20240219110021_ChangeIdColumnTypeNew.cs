@@ -30,8 +30,7 @@ namespace EtaLearning.DataAccess.Migrations
                 type: "int",
                 nullable: false,
                 oldClrType: typeof(Guid),
-                oldType: "uniqueidentifier")
-                .Annotation("SqlServer:Identity", "1, 1");
+                oldType: "uniqueidentifier");
         }
     }
 }
